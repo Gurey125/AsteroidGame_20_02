@@ -1,133 +1,155 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TestConsole.Loggers;
+using TestConsole.Extensions;
 
 namespace TestConsole
 {
     static class Program
     {
+        private static List<int> GetRandomRatings(Random rnd, int CountMin, int CountMax)
+        {
+            var count = rnd.Next(CountMin, CountMax + 1);
+            var result = new List<int>(count);
+            for (var i = 0; i < count; i++)
+                result.Add(rnd.Next(2, 6));
+            return result;
+        }
+
+        private static void OnStudentAdd(Student Student)
+        {
+            Console.WriteLine("Студент {0} добавлен", Student.Name);
+        }
+
+        private static void OnStudentRemoved(Student Student)
+        {
+            Console.WriteLine("Студент {0} отчислен", Student.Name);
+        }
+
+        private static void GoToVoenkomat(Student Student)
+        {
+            Console.WriteLine("Студент {0} отправлен служить", Student.Name);
+        }
+
         static void Main(string[] args)
         {
-            //TraceLogger trace_logger = null;
-            //try
-            //{
-            //    trace_logger = new TraceLogger();
-            //    trace_logger.Log("123");
-            //}
-            //finally
-            //{
-            //    trace_logger.Dispose();
-            //}
+            var dekanat = new Dekanat();
+            //dekanat.SubscribeToAdd(OnStudentAdd);
+            dekanat.SubscribeToRemove(OnStudentRemoved);
+            dekanat.SubscribeToRemove(GoToVoenkomat);
+            //dekanat.SubscribeToAdd(std => Console.WriteLine("Ещё раз поздравляем студента {0} с поступлением", std.Name));
 
-            using(var trace_logger = new TraceLogger())
-                trace_logger.Log("123");
+            dekanat.NewItemAdded += OnStudentAdd;
+            dekanat.ExelentStudentAdded += exelent_student => Console.WriteLine("!!! {0} !!!", exelent_student);
 
-            //Logger logger = new ListLogger();
-            //Logger logger = new FileLogger("program.log");
-            //Logger logger = new VisualStudioOutputLogger();
-            Logger logger = new TraceLogger();
-            Trace.Listeners.Add(new TextWriterTraceListener("trace.log"));
+            var rnd = new Random();
+            for (var i = 0; i < 100; i++)
+                dekanat.Add(new Student
+                {
+                    Name = $"Student {i + 1}",
+                    Ratings = rnd.GetRandomIntValues(20, 2, 6).ToList() //GetRandomRatings(rnd, 20, 50)
+                });
 
-            var critical_logger = new ListLogger();
-            var student_logger = new Student { Name = "Иванов" };
-            var student_clone = (Student) student_logger.Clone();
+            dekanat.Add(new Student { Name = "Strange student", Ratings = new List<int> { 5, 5, 5, 4 } });
 
-            ((ILogger)student_logger).LogError("Error!");
+            const string students_data_file = "students.csv";
+            dekanat.SaveToFile(students_data_file);
 
-            DoSomeCriticalWork(student_logger);
+            var dekanat2 = new Dekanat();
+            dekanat2.LoadFromFile(students_data_file);
 
-            logger.LogInformation("Start program");
 
-            for (var i = 0; i < 10; i++)
-                logger.LogInformation($"Do some work {i + 1}");
+            var student = new Student
+            {
+                Name = $"Student",
+                Ratings = GetRandomRatings(rnd, 20, 50)
+            };
 
-            logger.LogWarning("Завершение работы приложения");
+            //var result = student.CompareTo(dekanat);
 
-            //var log_message = ((ListLogger)logger).Messages;
+            //foreach (var std in dekanat2)
+            //    Console.WriteLine(std);
 
-            var random = new Random();
-            var students = new Student[100];
-            for (var i = 0; i < students.Length; i++)
-                students[i] = new Student { Name = $"Student {i + 1}", Height = random.Next(150, 211) };
+            var average_rating = dekanat2.Average(s => s.AverageRating);
+            var sum_average_rating = dekanat2.Sum(s => s.AverageRating);
 
-            Array.Sort(students);
+            var random_student_name = rnd.NextValue("Иванов", "Петров", "Сидоров");
 
-            Trace.Flush();
-            
+            var random_rating = rnd.NextValue(2, 3, 4, 5);
+
+            //StudentProcessor processor = new StudentProcessor(GetIndexedStudentName);
+            //StudentProcessor processor = GetIndexedStudentName;
+
+            //var index = 0;
+            //foreach (var s in dekanat2)
+            //    Console.WriteLine(processor(s, index++));
+
+            //Console.ReadLine();
+            //processor = GetAverageStudentRating;
+
+            //index = 0;
+            //foreach (var s in dekanat2)
+            //    Console.WriteLine(processor(s, index++));
+
+            //Console.ReadLine();
+            //ProcessStudents(dekanat2, GetIndexedStudentName);
+
+            //Console.ReadLine();
+            //ProcessStudents(dekanat2, GetAverageStudentRating);
+
+            //Console.ReadLine();
+            //Console.Clear();
+            //ProcessStudentsStandard(dekanat2, PrintStudent);
+
+            //var metrics = GetStudentsMetrics(dekanat2, std => std.Name.Length + (int) (student.AverageRating * 10));
+
+            Console.ReadLine();
+            var student_to_remove = dekanat.Skip(65).First();
+            dekanat.Remove(student_to_remove);
+
             Console.ReadLine();
         }
 
-        public static void DoSomeCriticalWork(ILogger log)
+        private static void PrintStudent(Student student)
         {
-            for (var i = 0; i < 10; i++)
+            Console.WriteLine("Студент: {0}", student.Name);
+        }
+
+        public static void ProcessStudentsStandard(IEnumerable<Student> Students, Action<Student> action)
+        {
+            foreach (var s in Students)
             {
-                log.LogInformation($"Do some very important work {i + 1}");
+                action(s);
             }
+        }
+
+        public static int[] GetStudentsMetrics(IEnumerable<Student> Students, Func<Student, int> GetMetric)
+        {
+            var result = new List<int>();
+            foreach (var student in Students)
+                result.Add(GetMetric(student));
+            return result.ToArray();
+        }
+
+        public static void ProcessStudents(IEnumerable<Student> Students, StudentProcessor Processor)
+        {
+            var index = 0;
+            foreach (var s in Students)
+                Console.WriteLine(Processor(s, index++));
+        }
+
+        private static string GetIndexedStudentName(Student student, int Index)
+        {
+            return $"{student.Name}[{Index}]";
+        }
+
+        public static string GetAverageStudentRating(Student student, int Index)
+        {
+            return $"[{Index}]:{student.Name} - {student.AverageRating}";
         }
     }
 
-    public class Student : ILogger, IComparable, ICloneable
-    {
-        private List<string> _Messages = new List<string>();
+    internal delegate string StudentProcessor(Student Student, int Index);
 
-        public double Height { get; set; } = 175;
-
-        public string Name { get; set; }
-
-        public List<int> Ratings { get; set; } = new List<int>();
-
-        public void Log(string Message)
-        {
-            Ratings.Add(Message.Length);
-            _Messages.Add(Message);
-        }
-
-        public void LogInformation(string Message) { Log("Info:" + Message); }
-
-        public void LogWarning(string Message) { Log("Warning:" + Message); }
-
-        //public void LogError(string Message) { Log("Error:" + Message); }
-        void ILogger.LogError(string Message) { Log("Error:" + Message); }
-
-        public int CompareTo(object obj)
-        {
-            if (obj is Student)
-            {
-                var other_student = (Student)obj;
-                //return StringComparer.OrdinalIgnoreCase.Compare(Name, other_student.Name);
-                if (Height > other_student.Height)
-                    return +1;
-                else if (Height.Equals(other_student.Height))
-                    return 0;
-                else
-                    return -1;
-            }
-            if (obj is null)
-                throw new ArgumentNullException(nameof(obj), "Попытка сравнения студента с пустотой");
-            throw new ArgumentException("Попытка сравнения студента с " + obj.GetType().Name, nameof(obj));
-        }
-
-        public override string ToString() => $"{Name} - {Height}";
-
-        public object Clone()
-        {
-            //var new_student = new Student
-            //{
-            //    _Messages = new List<string>(_Messages),
-            //    Height = Height,
-            //    Name = Name,
-            //    Ratings = new List<int>(Ratings)
-            //};
-
-            var new_student = (Student)MemberwiseClone();
-            new_student._Messages = new List<string>(_Messages);
-            new_student.Ratings = new List<int>(Ratings);
-
-            return new_student;
-        }
-    }
+    internal delegate void Action<T1, T2, T3, T4, T5, T6, T7, T8>(T1 p1, T2 p2, T3 p3, T4 p4, T5 p5, T6 p6, T7 p7, T8 p8);
 }
