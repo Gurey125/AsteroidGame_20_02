@@ -13,8 +13,9 @@ namespace AsteroidGame.VisualObjects
         public event EventHandler ShipDestroyed;
 
         private int _Energy = 20;
-
+        
         public int Energy => _Energy;
+        
 
         public SpaceShip(Point Position, Point Direction, Size Size) 
             : base(Position, Direction, Size)
@@ -55,6 +56,12 @@ namespace AsteroidGame.VisualObjects
             if (is_collision && obj is Asteroid asteroid)
             {
                 ChangeEnergy(-asteroid.Power);
+                Console.WriteLine("Астероид ударил корабль!");
+            }
+            if (is_collision && obj is Aid aid)
+            {
+                ChangeEnergy(aid.Power);
+                Console.WriteLine("Корабль получил помощь!");
             }
 
             return is_collision;

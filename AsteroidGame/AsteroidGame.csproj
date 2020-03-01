@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Game.cs" />
+    <Compile Include="VisualObjects\Aid.cs" />
     <Compile Include="VisualObjects\Asteroid.cs" />
     <Compile Include="VisualObjects\Bullet.cs" />
     <Compile Include="VisualObjects\CollisionObject.cs" />
@@ -119,6 +120,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Ast.png" />
+    <None Include="Resources\aid.png" />
+    <Content Include="src\aid.png" />
     <Content Include="src\asteroid.png" />
   </ItemGroup>
   <ItemGroup />
