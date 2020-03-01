@@ -16,6 +16,8 @@ namespace AsteroidGame
         private static BufferedGraphics __Buffer;
         private static Timer __Timer;
 
+        private static int _Points = 0;
+
         public static int Width { get; set; }
 
         public static int Height { get; set; }
@@ -86,6 +88,14 @@ namespace AsteroidGame
                     new Point(rnd.Next(0, Width), rnd.Next(0, Height)),
                     new Point(-rnd.Next(0, asteroid_max_speed), 0),
                     asteroid_size));
+            const int aid_count = 10;
+            const int aid_size = 20;
+            const int aid_max_speed = 15;
+            for (var i = 0; i < aid_count; i++)
+                game_objects.Add(new Aid(
+                    new Point(rnd.Next(0, Width), rnd.Next(0, Height)),
+                    new Point(-rnd.Next(0, aid_max_speed), 0),
+                    aid_size));
 
             __GameObjects = game_objects.ToArray();
             __Bullet = new Bullet(200);
@@ -115,7 +125,7 @@ namespace AsteroidGame
             __Ship.Draw(g);
 
             g.DrawString($"Energy: {__Ship.Energy}", new Font(FontFamily.GenericSansSerif, 14, FontStyle.Italic), Brushes.White, 10, 10);
-
+            g.DrawString($"Points: {_Points}", new Font(FontFamily.GenericSansSerif, 14, FontStyle.Italic), Brushes.White, 10, 25);
             __Buffer.Render();
         }
 
@@ -139,6 +149,8 @@ namespace AsteroidGame
                         __Bullet = null;
                         //__Bullet = new Bullet(new Random().Next(Width));
                         __GameObjects[i] = null;
+
+                        _Points++;
                         MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     }
                 }
