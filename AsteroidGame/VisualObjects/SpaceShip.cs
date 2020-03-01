@@ -56,10 +56,12 @@ namespace AsteroidGame.VisualObjects
             if (is_collision && obj is Asteroid asteroid)
             {
                 ChangeEnergy(-asteroid.Power);
+                Console.WriteLine("Астероид ударил корабль!");
             }
             if (is_collision && obj is Aid aid)
             {
                 ChangeEnergy(aid.Power);
+                Console.WriteLine("Корабль получил помощь!");
             }
 
             return is_collision;

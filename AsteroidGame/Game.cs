@@ -151,6 +151,7 @@ namespace AsteroidGame
                         __GameObjects[i] = null;
 
                         _Points++;
+                        Console.WriteLine("Астероид уничтожен!");
                         MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     }
                 }
