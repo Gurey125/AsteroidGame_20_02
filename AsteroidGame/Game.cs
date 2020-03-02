@@ -16,6 +16,11 @@ namespace AsteroidGame
         private static BufferedGraphicsContext __Context;
         private static BufferedGraphics __Buffer;
         private static Timer __Timer;
+        const int asteroids_count = 1;
+        const int asteroid_size = 25;
+        const int asteroid_max_speed = 20;
+        static Random rnd = new Random();
+        private static int currentCount = asteroids_count;
 
         public static int Width { get; set; }
 
@@ -67,10 +72,11 @@ namespace AsteroidGame
         private static VisualObject[] __GameObjects;
         //private static Bullet __Bullet;
         private static List<Bullet> __Bullets = new List<Bullet>();
+        private static List<Asteroid> __Asteroids = new List<Asteroid>();
         public static void Load()
         {
             var game_objects = new List<VisualObject>();
-            var rnd = new Random();
+            
 
             const int stars_count = 150;
             const int star_size = 5;
@@ -81,14 +87,23 @@ namespace AsteroidGame
                     new Point(-rnd.Next(0, star_max_speed), 0),
                     star_size));
 
-            const int asteroids_count = 10;
-            const int asteroid_size = 25;
-            const int asteroid_max_speed = 20;
-            for (var i = 0; i < asteroids_count; i++)
-                game_objects.Add(new Asteroid(
+            //const int asteroids_count = 10;
+            //currentCount = asteroids_count;
+            //const int asteroid_size = 25;
+            //const int asteroid_max_speed = 20;
+            ////for (var i = 0; i < asteroids_count; i++)
+            //    game_objects.Add(new Asteroid(
+            //        new Point(rnd.Next(0, Width), rnd.Next(0, Height)),
+            //        new Point(-rnd.Next(0, asteroid_max_speed), 0),
+            //        asteroid_size));
+            for (int i = 0; i < asteroids_count; i++)
+            {
+                __Asteroids.Add(new Asteroid(
                     new Point(rnd.Next(0, Width), rnd.Next(0, Height)),
                     new Point(-rnd.Next(0, asteroid_max_speed), 0),
                     asteroid_size));
+            }
+
 
             __GameObjects = game_objects.ToArray();
             //__Bullet = new Bullet(200);
@@ -113,6 +128,8 @@ namespace AsteroidGame
 
             foreach (var visual_object in __GameObjects)
                 visual_object?.Draw(g);
+            foreach (var visual_object in __Asteroids)
+                visual_object?.Draw(g);
 
             //__Bullet?.Draw(g);
             foreach (var bullet in __Bullets) bullet.Draw(g);
@@ -128,8 +145,11 @@ namespace AsteroidGame
         {
             foreach (var visual_object in __GameObjects)
                 visual_object?.Update();
+            foreach (var visual_object in __Asteroids)
+                visual_object?.Update();
 
             var bullets_to_remove = new List<Bullet>();
+            var asteroid_to_remove = new List<Asteroid>();
             foreach (var bullet in __Bullets)
             {
                 bullet.Update();
@@ -138,33 +158,60 @@ namespace AsteroidGame
             }
             //__Bullet?.Update();
 
-            for (var i = 0; i < __GameObjects.Length; i++)
-            {
-                var obj = __GameObjects[i];
-                if (obj is ICollision) // Применить "сопоставление с образцом"!
-                {
-                    var collision_object = (ICollision)obj;
-                    __Ship.CheckCollision(collision_object);
-                    foreach (var bullet in __Bullets.ToArray())
-                        if (bullet.CheckCollision(collision_object))
-                        {
-                            bullets_to_remove.Add(bullet);
-                            __GameObjects[i] = null;
-                            MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        }
+            //for (var i = 0; i < __GameObjects.Length; i++)
+            //{
+            //    var obj = __GameObjects[i];
+            //    if (obj is ICollision) // Применить "сопоставление с образцом"!
+            //    {
+            //        var collision_object = (ICollision)obj;
+            //        __Ship.CheckCollision(collision_object);
+            //        foreach (var bullet in __Bullets.ToArray())
+            //            if (bullet.CheckCollision(collision_object))
+            //            {
+            //                bullets_to_remove.Add(bullet);
+            //                __GameObjects[i] = null;
+            //                MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            //            }
 
-                    //if (__Bullets.Any(b => b.CheckCollision(collision_object)))
-                    //{
-                    //    __GameObjects[i] = null;
-                    //    MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                    //}
-                    //foreach (var bullet in __Bullets.Where(b => b.CheckCollision(collision_object)))
-                    //    __Bullets.Remove(bullet);
-                }
+            //        //if (__Bullets.Any(b => b.CheckCollision(collision_object)))
+            //        //{
+            //        //    __GameObjects[i] = null;
+            //        //    MessageBox.Show("Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            //        //}
+            //        //foreach (var bullet in __Bullets.Where(b => b.CheckCollision(collision_object)))
+            //        //    __Bullets.Remove(bullet);
+            //    }
+            //}
+            foreach (var asteroid in __Asteroids.ToArray())
+            {
+                __Ship.CheckCollision((ICollision)asteroid);
+
+                foreach (var bullet in __Bullets.ToArray())
+                    if (bullet.CheckCollision((ICollision)asteroid))
+                    {
+                        bullets_to_remove.Add(bullet);
+                        asteroid_to_remove.Add(asteroid);
+                        
+                     //   MessageBox.Show("!!!!!!!!!!!!Астероид уничтожен!", "Столкновение", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    }
             }
 
-            foreach (var bullet in bullets_to_remove)
+
+                foreach (var bullet in bullets_to_remove)
                 __Bullets.Remove(bullet);
+                foreach (var asteroid in asteroid_to_remove)
+                __Asteroids.Remove(asteroid);
+            if (__Asteroids.Count < 1)
+            {
+                currentCount++;
+                for (int i = 0; i < currentCount; i++)
+                {
+                    __Asteroids.Add(new Asteroid(
+                        new Point(rnd.Next(0, Width), rnd.Next(0, Height)),
+                        new Point(-rnd.Next(0, asteroid_max_speed), 0),
+                        asteroid_size));
+                }
+            }
         }
     }
 }
