@@ -14,14 +14,36 @@
 
             <Style TargetType="Button" BasedOn="{StaticResource RedButtonStyle}"/>
         </Grid.Resources>
-        <CheckBox Content="CheckBox" HorizontalAlignment="Left" Margin="182,124,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="CheckBox" HorizontalAlignment="Left" Margin="231,184,0,0" VerticalAlignment="Top"/>
-        <CheckBox Content="CheckBox" Margin="380,196,341,208" d:LayoutOverrides="Width, Height"/>
+        <ListView x:Name="EmpList"  HorizontalAlignment="Left" Height="260" Margin="49,35,0,0" VerticalAlignment="Top" Width="189" SelectionChanged="SelectionChangedHandler">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Сотрудник" DisplayMemberBinding="{Binding Path=Name}" />
+                    <GridViewColumn Header="Департамент" DisplayMemberBinding="{Binding Path=Department}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <ListView x:Name="DepList" 
+                  HorizontalAlignment="Left" Height="260" 
+                  Margin="434,35,0,0" VerticalAlignment="Top" Width="182" 
+                  SelectionChanged="DepList_SelectionChanged"
+>
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Header="Dep" DisplayMemberBinding="{Binding Path=Name}" />
 
-        <Button Content="Button" Margin="370,126,347,0" 
-                VerticalAlignment="Top"
-                />
-        <Button Content="Button" Margin="307,101,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="75"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <TextBox x:Name="txtEmpName" HorizontalAlignment="Left" Height="23" Margin="263,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <TextBlock HorizontalAlignment="Left" Margin="263,106,0,0" TextWrapping="Wrap" Text="Имя" VerticalAlignment="Top"/>
+        <TextBlock HorizontalAlignment="Left" Margin="263,155,0,0" TextWrapping="Wrap" Text="Департамент" VerticalAlignment="Top"/>
+        <ComboBox x:Name="cbEmpDep" HorizontalAlignment="Left" Margin="263,176,0,0" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnEmpSave" Content="Save" HorizontalAlignment="Left" Margin="335,218,0,0" VerticalAlignment="Top" Width="61" Click="btnEmpSave_Click"/>
+        <Button x:Name="btnEmpSaveNew" Content="Save new" HorizontalAlignment="Left" Margin="251,218,0,0" VerticalAlignment="Top" Width="66" RenderTransformOrigin="0.056,0.652" Click="btnEmpSaveNew_Click"/>
+        <TextBox x:Name="txtDepName" HorizontalAlignment="Left" Height="23" Margin="646,176,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120"/>
+        <Button x:Name="btnDepSave" Content="Save" HorizontalAlignment="Left" Margin="713,218,0,0" VerticalAlignment="Top" Width="53" Click="btnDepSave_Click"/>
+        <Button x:Name="btnDepSaveNew" Content="Save new" HorizontalAlignment="Left" Margin="646,218,0,0" VerticalAlignment="Top" Width="50" Click="btnDepSaveNew_Click"/>
+        <TextBlock HorizontalAlignment="Left" Margin="646,155,0,0" TextWrapping="Wrap" Text="Департамент" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
